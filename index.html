@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <script src="download.js"></script>
+    </head>
+    <style>
+        img {
+            padding: 5px;
+        }
+    </style>
+    <body>
+    </body>
+    <script>
+        var dir = "thumbnails/";
+        $.ajax({
+            url: dir,
+            success: function (data) {
+                $(data).find("a").attr("href", function (i, val) {
+                    if( val.match(/\.(jpe?g|png|gif)$/) ) {
+                        $("body").append( "<img src='" + dir + val +"'>" );
+                    }
+                });
+                $("img").click(function(){
+                    var url = this.src.replace("thumbnails", "images");
+                    var type = url.split(".").pop();
+                    var name = url.split("/")[4];
+                    var x = new XMLHttpRequest();
+                    x.open("GET", url, true);
+                    x.responseType = "blob";
+                    x.onload = function(e) {
+                        download(x.response, name, "image/" + type);
+                    }
+                    x.send();
+                });
+            }
+        });
+    </script>
+</html>
