@@ -45,7 +45,7 @@ while finished:
 		processed_urls += 1
         
         for x in jobs:
-            p.join()
+            x.join()
         
 	if processed_urls == 50:
 		last_msg = msg_json[49]["id"]
