@@ -22,3 +22,7 @@ function displayImages(dir, thumb_dir) {
             }
         }); 
 }
+
+$(document).ready(function() {
+    $('#navbar').load('navbar.html');
+});
