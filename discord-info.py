@@ -2,6 +2,28 @@ import requests
 import os
 import sys
 
+def get_selection_id(selection, selection_text):
+    print selection_text
+    sel = 0
+    id_selected = 0
+    raw_json = []
+    
+    for s in selection:
+        raw_json.append(s)
+        print str(sel) + " " + s['name']
+        sel += 1
+
+    try:
+        id_selected = int(raw_input())
+        if id_selected > sel - 1:
+            print "Bad input"
+            return 0
+    except ValueError:
+        print "Bad input"
+        return 0
+    
+    return raw_json[id_selected]["id"]
+
 if len(sys.argv) < 3:
 	print "usage " + str(sys.argv[0]) + " email password"
 	exit(0)
@@ -16,12 +38,9 @@ headers = {"authorization": token}
 servers = requests.get("https://discordapp.com/api/users/@me/guilds", headers=headers)
 servers = servers.json()
 
-channels = []
+servers_by_id = get_selection_id(servers, "Select Server")
 
-for s in servers:
-    channels.append(requests.get("https://discordapp.com/api/guilds/" + str(s["id"]) + "/channels", headers=headers))
+chosen_server = requests.get("https://discordapp.com/api/guilds/" + str(servers_by_id) + "/channels", headers=headers)
+chosen_server = chosen_server.json()
 
-for x in channels:
-    ch = x.json()
-    for y in ch:
-        print y["name"] + " " + y["id"]
+print get_selection_id(chosen_server, "Select Channel")
