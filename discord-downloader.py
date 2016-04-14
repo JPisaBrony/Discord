@@ -18,12 +18,24 @@ def get_selection(selection, selection_text):
         id_selected = int(raw_input())
         if id_selected > sel - 1:
             print "Bad input"
-            return 0
+            exit(0)
     except ValueError:
         print "Bad input"
-        return 0
+        exit(0)
     
     return raw_json[id_selected]
+
+def fileDownload(url, dir):
+        img = requests.get(url, stream=True)
+        img_name = ""
+        if img.status_code == 200:
+		name = url.split("/")
+		img_name = name[6]
+		with open(str(dir) + name[6], "wb+") as f:
+			for chunk in img:
+				f.write(chunk)
+	print img_name
+
 
 if len(sys.argv) < 3:
 	print "usage " + str(sys.argv[0]) + " email password"
@@ -52,26 +64,16 @@ msg_json = messages.json()
 processed_urls = 0
 finished = True
 
-if not os.path.exists("images"):
-	os.makedirs("images")
-
-def fileDownload(url, dir):
-        img = requests.get(url, stream=True)
-        img_name = ""
-        if img.status_code == 200:
-		name = url.split("/")
-		img_name = name[6]
-		with open(str(dir) + name[6], "wb+") as f:
-			for chunk in img:
-				f.write(chunk)
-	print img_name
+folder_dir = str(servers_by_id['name']) + "/" + str(channel['name']) + "/"
+if not os.path.exists(folder_dir):
+	os.makedirs(folder_dir)
 
 while finished:
         jobs = []
 	for x in msg_json:
 		for y in x["attachments"]:
 			url = y["url"]
-                        p = Process(target=fileDownload, args=(url, "images/"))
+                        p = Process(target=fileDownload, args=(url, folder_dir))
                         p.start()
                         jobs.append(p)
 		processed_urls += 1
