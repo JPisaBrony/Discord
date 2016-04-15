@@ -2,6 +2,7 @@ from multiprocessing import Process
 import requests
 import os
 import sys
+import re
 
 def get_selection(selection, selection_text):
     print selection_text
@@ -30,12 +31,11 @@ def fileDownload(url, dir):
         img_name = ""
         if img.status_code == 200:
 		name = url.split("/")
-		img_name = name[6]
-		with open(str(dir) + name[6], "wb+") as f:
+		img_name = name[-1].split("?")
+		with open(str(dir) + img_name[0], "wb+") as f:
 			for chunk in img:
 				f.write(chunk)
-	print img_name
-
+	print img_name[0]
 
 if len(sys.argv) < 3:
 	print "usage " + str(sys.argv[0]) + " email password"
@@ -77,6 +77,18 @@ while finished:
                         p.start()
                         jobs.append(p)
 		processed_urls += 1
+		url_check = x['content']
+		if url_check:
+                    if "http" in url_check:
+                        url_list = re.split(r'[ \n]', url_check)
+                        for u in url_list:
+                            if "http" in u:
+                                check_if_real = requests.get(u)
+                                if check_if_real.status_code == 200:
+                                    if "text/html" not in check_if_real.headers['content-type']:
+                                        p = Process(target=fileDownload, args=(u, folder_dir))
+                                        p.start()
+                                        jobs.append(p)
         
         for x in jobs:
             x.join()
