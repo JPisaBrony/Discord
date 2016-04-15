@@ -27,19 +27,19 @@ def get_selection(selection, selection_text):
     return raw_json[id_selected]
 
 def fileDownload(url, dir):
-        img = requests.get(url, stream=True)
-        img_name = ""
-        if img.status_code == 200:
-		name = url.split("/")
-		img_name = name[-1].split("?")
-		with open(str(dir) + img_name[0], "wb+") as f:
-			for chunk in img:
-				f.write(chunk)
-	print img_name[0]
+    img = requests.get(url, stream=True)
+    img_name = ""
+    if img.status_code == 200:
+        name = url.split("/")
+        img_name = name[-1].split("?")
+        with open(str(dir) + img_name[0], "wb+") as f:
+            for chunk in img:
+                f.write(chunk)
+    print img_name[0]
 
 if len(sys.argv) < 3:
-	print "usage " + str(sys.argv[0]) + " email password"
-	exit(0)
+    print "usage " + str(sys.argv[0]) + " email password"
+    exit(0)
 
 email = sys.argv[1]
 password = sys.argv[2]
@@ -69,34 +69,34 @@ if not os.path.exists(folder_dir):
 	os.makedirs(folder_dir)
 
 while finished:
-        jobs = []
-	for x in msg_json:
-		for y in x["attachments"]:
-			url = y["url"]
-                        p = Process(target=fileDownload, args=(url, folder_dir))
-                        p.start()
-                        jobs.append(p)
-		processed_urls += 1
-		url_check = x['content']
-		if url_check:
-                    if "http" in url_check:
-                        url_list = re.split(r'[ \n]', url_check)
-                        for u in url_list:
-                            if "http" in u:
-                                check_if_real = requests.get(u)
-                                if check_if_real.status_code == 200:
-                                    if "text/html" not in check_if_real.headers['content-type']:
-                                        p = Process(target=fileDownload, args=(u, folder_dir))
-                                        p.start()
-                                        jobs.append(p)
-        
-        for x in jobs:
-            x.join()
-        
-	if processed_urls == 50:
-		last_msg = msg_json[49]["id"]
-		messages = requests.get("https://discordapp.com/api/channels/" + str(channel['id']) + "/messages?before=" + str(last_msg), headers=headers)
-		msg_json = messages.json()
-		processed_urls = 0
-	else:
-		finished = False
+    jobs = []
+    for x in msg_json:
+        for y in x["attachments"]:
+                url = y["url"]
+                p = Process(target=fileDownload, args=(url, folder_dir))
+                p.start()
+                jobs.append(p)
+        url_check = x['content']
+        if url_check:
+            if "http" in url_check:
+                url_list = re.split(r'[ \n]', url_check)
+                for u in url_list:
+                    if "http" in u:
+                        check_if_real = requests.get(u)
+                        if check_if_real.status_code == 200:
+                            if "text/html" not in check_if_real.headers['content-type']:
+                                p = Process(target=fileDownload, args=(u, folder_dir))
+                                p.start()
+                                jobs.append(p)
+        processed_urls += 1
+    
+    for x in jobs:
+        x.join()
+    
+    if processed_urls == 50:
+        last_msg = msg_json[49]["id"]
+        messages = requests.get("https://discordapp.com/api/channels/" + str(channel['id']) + "/messages?before=" + str(last_msg), headers=headers)
+        msg_json = messages.json()
+        processed_urls = 0
+    else:
+        finished = False
