@@ -27,13 +27,17 @@ def get_selection(selection, selection_text):
     
     return raw_json[id_selected]
 
-def fileDownload(url, dir):
+def fileDownload(url, dir, day):
     img = requests.get(url, stream=True)
     img_name = ""
     if img.status_code == 200:
         name = url.split("/")
         img_name = name[-1].split("?")
-        with open(str(dir) + str(uuid.uuid4()) + "?" + img_name[0], "wb+") as f:
+        folder_path = str(dir) + day
+        folder_string = str(dir) + day + "/" + str(uuid.uuid4()) + "?" + img_name[0]
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        with open(folder_string, "wb+") as f:
             for chunk in img:
                 f.write(chunk)
     print img_name[0]
@@ -72,9 +76,12 @@ if not os.path.exists(folder_dir):
 while finished:
     jobs = []
     for x in msg_json:
+        day = x["timestamp"]
+        day = day.split("T")
+        day = day[0]
         for y in x["attachments"]:
                 url = y["url"]
-                p = Process(target=fileDownload, args=(url, folder_dir))
+                p = Process(target=fileDownload, args=(url, folder_dir, day))
                 p.start()
                 jobs.append(p)
         url_check = x['content']
@@ -86,7 +93,7 @@ while finished:
                         check_if_real = requests.get(u)
                         if check_if_real.status_code == 200:
                             if "text/html" not in check_if_real.headers['content-type']:
-                                p = Process(target=fileDownload, args=(u, folder_dir))
+                                p = Process(target=fileDownload, args=(u, folder_dir, day))
                                 p.start()
                                 jobs.append(p)
         processed_urls += 1
