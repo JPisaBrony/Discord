@@ -3,6 +3,7 @@ import requests
 import os
 import sys
 import re
+import uuid
 
 def get_selection(selection, selection_text):
     print selection_text
@@ -32,7 +33,7 @@ def fileDownload(url, dir):
     if img.status_code == 200:
         name = url.split("/")
         img_name = name[-1].split("?")
-        with open(str(dir) + img_name[0], "wb+") as f:
+        with open(str(dir) + str(uuid.uuid4()) + "?" + img_name[0], "wb+") as f:
             for chunk in img:
                 f.write(chunk)
     print img_name[0]
