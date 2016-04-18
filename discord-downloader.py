@@ -91,8 +91,8 @@ while finished:
                 for u in url_list:
                     if "http" in u:
                         try:
-                            check_if_real = requests.get(u)
-                        except ConnectionError:
+                            check_if_real = requests.get(u, timeout=15)
+                        except requests.exceptions.ConnectionError:
                             with open("skipped-urls.txt", "a") as file:
                                     file.write(u + "\n")
                         if check_if_real.status_code == 200:
