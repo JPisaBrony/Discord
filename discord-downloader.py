@@ -80,10 +80,10 @@ while finished:
         day = day.split("T")
         day = day[0]
         for y in x["attachments"]:
-                url = y["url"]
-                p = Process(target=fileDownload, args=(url, folder_dir, day))
-                p.start()
-                jobs.append(p)
+            url = y["url"]
+            p = Process(target=fileDownload, args=(url, folder_dir, day))
+            p.start()
+            jobs.append(p)
         url_check = x['content']
         if url_check:
             if "http" in url_check:
@@ -96,6 +96,9 @@ while finished:
                                 p = Process(target=fileDownload, args=(u, folder_dir, day))
                                 p.start()
                                 jobs.append(p)
+                            else:
+                                with open("skipped-urls.txt", "a") as file:
+                                    file.write(u + "\n")
         processed_urls += 1
     
     for x in jobs:
