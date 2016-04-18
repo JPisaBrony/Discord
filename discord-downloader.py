@@ -90,7 +90,11 @@ while finished:
                 url_list = re.split(r'[ \n]', url_check)
                 for u in url_list:
                     if "http" in u:
-                        check_if_real = requests.get(u)
+                        try:
+                            check_if_real = requests.get(u)
+                        except ConnectionError:
+                            with open("skipped-urls.txt", "a") as file:
+                                    file.write(u + "\n")
                         if check_if_real.status_code == 200:
                             if "text/html" not in check_if_real.headers['content-type']:
                                 p = Process(target=fileDownload, args=(u, folder_dir, day))
