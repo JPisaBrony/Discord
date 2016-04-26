@@ -37,9 +37,16 @@ def fileDownload(url, dir, day):
         folder_string = str(dir) + day + "/" + str(uuid.uuid4()) + "?" + img_name[0]
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
-        with open(folder_string, "wb+") as f:
-            for chunk in img:
-                f.write(chunk)
+        try:
+            with open(folder_string, "wb+") as f:
+                for chunk in img:
+                    f.write(chunk)
+        except IOError:
+            ext = img.headers['content-type'].split('/')
+            folder_string = str(dir) + day + "/" + str(uuid.uuid4()) + "?" + "was_to_long." + ext[1]
+            with open(folder_string, "wb+") as f:
+                for chunk in img:
+                    f.write(chunk)
     print img_name[0]
 
 if len(sys.argv) < 3:
@@ -87,7 +94,7 @@ while finished:
         url_check = x['content']
         if url_check:
             if "http" in url_check:
-                url_list = re.split(r'[ \n]', url_check)
+                url_list = re.split(r'[ \n<>]', url_check)
                 for u in url_list:
                     if "http" in u:
                         try:
